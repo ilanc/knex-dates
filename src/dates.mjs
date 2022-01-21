@@ -18,13 +18,14 @@ function timeZoneStr() {
   } else if (TZ_OFFSET > 0) {
     tzStr = "-" + offset_hrs + ":" + offset_min;
   } else if (TZ_OFFSET == 0) {
-    tzStr = "Z";
+    tzStr = "+00:00";
   }
   return tzStr;
 }
 
 // TODO: try replace with a TZ_OFFSET that differs from your actual timezone
 // const TZ_OFFSET = -300; // +05:00
+// const TZ_OFFSET = 0; // +00:00
 const TZ_OFFSET = new Date().getTimezoneOffset();
 const TZ_OFFSET_MS = TZ_OFFSET * 60 * 1000;
 const TZ_STR = timeZoneStr();

@@ -125,3 +125,48 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 |  4 | +05:00 Local 00:00  | 2022-01-01 03:00:00 | <= knex uses configured timezone (+5) on insert
 +----+---------------------+---------------------+
 ```
+
+Running in +02:00 timezone with timezone set to +0 or left on default
+
+```log
+npm run start
+
+> knex-dates@0.0.1 start
+> node ./src/dates.mjs && ./src/select.sh
+
+TZ_STR: +00:00
+┌─────────┬────┬───────────────────────┬──────────────────────────┐
+│ (index) │ id │        message        │          date1           │
+├─────────┼────┼───────────────────────┼──────────────────────────┤
+│    0    │ 1  │  'default UTC 00:00'  │ 2022-01-01T00:00:00.000Z │
+│    1    │ 2  │ 'default Local 00:00' │ 2021-12-31T22:00:00.000Z │
+│    2    │ 3  │  '+00:00 UTC 00:00'   │ 2021-12-31T22:00:00.000Z │ <= not offset on insert, but is offset on select so is incorrectly offset by system timezone (-2 in this case) - see sql output
+│    3    │ 4  │ '+00:00 Local 00:00'  │ 2021-12-31T20:00:00.000Z │ <= not offset on insert, but is offset on select so is incorrectly offset by system timezone (-2 in this case) - see sql output
+└─────────┴────┴───────────────────────┴──────────────────────────┘
+┌─────────┬────┬───────────────────────┬──────────────────────────┐
+│ (index) │ id │        message        │        timestamp1        │
+├─────────┼────┼───────────────────────┼──────────────────────────┤
+│    0    │ 1  │  'default UTC 00:00'  │ 2022-01-01T00:00:00.000Z │
+│    1    │ 2  │ 'default Local 00:00' │ 2021-12-31T22:00:00.000Z │
+│    2    │ 3  │  '+00:00 UTC 00:00'   │ 2021-12-31T22:00:00.000Z │
+│    3    │ 4  │ '+00:00 Local 00:00'  │ 2021-12-31T20:00:00.000Z │
+└─────────┴────┴───────────────────────┴──────────────────────────┘
+mysql: [Warning] Using a password on the command line interface can be insecure.
++----+---------------------+---------------------+
+| id | message             | date1               |
++----+---------------------+---------------------+
+|  1 | default UTC 00:00   | 2022-01-01 02:00:00 |
+|  2 | default Local 00:00 | 2022-01-01 00:00:00 |
+|  3 | +00:00 UTC 00:00    | 2022-01-01 00:00:00 | <= knex uses configured timezone (+0) on insert
+|  4 | +00:00 Local 00:00  | 2021-12-31 22:00:00 | <= knex uses configured timezone (+0) on insert
++----+---------------------+---------------------+
+mysql: [Warning] Using a password on the command line interface can be insecure.
++----+---------------------+---------------------+
+| id | message             | timestamp1          |
++----+---------------------+---------------------+
+|  1 | default UTC 00:00   | 2022-01-01 02:00:00 |
+|  2 | default Local 00:00 | 2022-01-01 00:00:00 |
+|  3 | +00:00 UTC 00:00    | 2022-01-01 00:00:00 | <= knex uses configured timezone (+0) on insert
+|  4 | +00:00 Local 00:00  | 2021-12-31 22:00:00 | <= knex uses configured timezone (+0) on insert
++----+---------------------+---------------------+
+```
