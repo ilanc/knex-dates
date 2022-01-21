@@ -1,0 +1,16 @@
+{
+  "name": "knex-dates",
+  "version": "0.0.1",
+  "description": "prototype app",
+  "main": "src/dates.mjs",
+  "author": "ilan@spikedata.co.za",
+  "license": "MIT",
+  "scripts": {
+    "setup": "./scripts/create.sh",
+    "start": "node ./src/dates.mjs && ./src/select.sh"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "knex": "^1.0.1"
+  }
+}
