@@ -29,8 +29,8 @@ const TZ_OFFSET = new Date().getTimezoneOffset();
 const TZ_OFFSET_MS = TZ_OFFSET * 60 * 1000;
 const TZ_STR = timeZoneStr();
 
-console.log("TZ_OFFSET:", TZ_OFFSET);
-console.log("TZ_OFFSET_MS:", TZ_OFFSET_MS);
+// console.log("TZ_OFFSET:", TZ_OFFSET);
+// console.log("TZ_OFFSET_MS:", TZ_OFFSET_MS);
 console.log("TZ_STR:", TZ_STR);
 
 //#endregion
@@ -113,7 +113,7 @@ truncate timestampTable;`);
 
 //#region test
 
-async function dateTest(offset, config) {
+async function dateTest(offset, config, doManualOffset = false) {
   let knex;
   try {
     knex = Knex(config);
@@ -137,25 +137,27 @@ async function dateTest(offset, config) {
     await insertTimestamp(knex, insertTimestamp2, false);
 
     // insert - do manual date offsetting
-    let insertDate3 = { message: offset + " UTC 00:00 (fixed)", date1: utc };
-    await insertDate(knex, insertDate3, true);
-    // console.log("utc:", utc);
-    let insertDate4 = {
-      message: offset + " Local 00:00 (fixed)",
-      date1: local,
-    };
-    // console.log("local:", local);
-    await insertDate(knex, insertDate4, true);
-    let insertTimestamp3 = {
-      message: offset + " UTC 00:00 (fixed)",
-      timestamp1: utc,
-    };
-    await insertTimestamp(knex, insertTimestamp3, true);
-    let insertTimestamp4 = {
-      message: offset + " Local 00:00 (fixed)",
-      timestamp1: local,
-    };
-    await insertTimestamp(knex, insertTimestamp4, true);
+    if (doManualOffset) {
+      let insertDate3 = { message: offset + " UTC 00:00 (fixed)", date1: utc };
+      await insertDate(knex, insertDate3, true);
+      // console.log("utc:", utc);
+      let insertDate4 = {
+        message: offset + " Local 00:00 (fixed)",
+        date1: local,
+      };
+      // console.log("local:", local);
+      await insertDate(knex, insertDate4, true);
+      let insertTimestamp3 = {
+        message: offset + " UTC 00:00 (fixed)",
+        timestamp1: utc,
+      };
+      await insertTimestamp(knex, insertTimestamp3, true);
+      let insertTimestamp4 = {
+        message: offset + " Local 00:00 (fixed)",
+        timestamp1: local,
+      };
+      await insertTimestamp(knex, insertTimestamp4, true);
+    }
   } catch (e) {
     console.error(e);
   } finally {
