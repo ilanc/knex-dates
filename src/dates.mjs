@@ -76,7 +76,7 @@ function fixDatesOnRead(instance) {
 }
 
 async function insertDate(knex, instance, fixDates = true) {
-  console.info(`insert date ${instance.message}`);
+  // console.info(`insert date ${instance.message}`);
   if (fixDates) {
     fixDatesOnWrite(instance);
   }
@@ -90,7 +90,7 @@ async function insertDate(knex, instance, fixDates = true) {
 }
 
 async function insertTimestamp(knex, instance, fixDates = true) {
-  console.info(`insert timestamp ${instance.message}`);
+  // console.info(`insert timestamp ${instance.message}`);
   if (fixDates) {
     fixDatesOnWrite(instance);
   }
@@ -120,8 +120,8 @@ async function dateTest(offset, config) {
 
     let utc = new Date("2022-01-01T00:00:00.000Z");
     let local = new Date("2022-01-01T00:00:00.000");
-    console.log("utc:", utc);
-    console.log("local:", local);
+    // console.log("utc:", utc);
+    // console.log("local:", local);
 
     // insert - no manual date offsetting
     let insertDate1 = { message: offset + " UTC 00:00", date1: utc };
@@ -139,12 +139,12 @@ async function dateTest(offset, config) {
     // insert - do manual date offsetting
     let insertDate3 = { message: offset + " UTC 00:00 (fixed)", date1: utc };
     await insertDate(knex, insertDate3, true);
-    console.log("utc:", utc);
+    // console.log("utc:", utc);
     let insertDate4 = {
       message: offset + " Local 00:00 (fixed)",
       date1: local,
     };
-    console.log("local:", local);
+    // console.log("local:", local);
     await insertDate(knex, insertDate4, true);
     let insertTimestamp3 = {
       message: offset + " UTC 00:00 (fixed)",
@@ -156,12 +156,6 @@ async function dateTest(offset, config) {
       timestamp1: local,
     };
     await insertTimestamp(knex, insertTimestamp4, true);
-
-    // select
-    const rows1 = await knex("dateTable").select("*");
-    console.table(rows1);
-    const rows2 = await knex("timestampTable").select("*");
-    console.table(rows2);
   } catch (e) {
     console.error(e);
   } finally {
@@ -179,13 +173,20 @@ async function run() {
   let knex;
   try {
     knex = Knex(config1);
-    // create tables
-    // TODO
 
+    // truncate so we can re-run on clean tables
     await truncate(knex);
 
+    // insert without timezone specified
     await dateTest("default", config1);
+    // insert without timezone specified
     await dateTest(TZ_STR, config2);
+
+    // select
+    const rows1 = await knex("dateTable").select("*");
+    console.table(rows1);
+    const rows2 = await knex("timestampTable").select("*");
+    console.table(rows2);
   } catch (e) {
     console.error(e);
   } finally {
