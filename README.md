@@ -4,10 +4,15 @@ Dates are tricky
 
 Current behaviour (2022-01-20)
 
-- knex appears to tzoffset on insert and on select for both DATETIME and TIMESTAMP
-- it seems to default to the local timezone offset if not specied i.e.
-  - setting `{ connection: { timezone: "+02:00" } }` in the Knex config options has same effect as NOT setting `timezone` if you are in SAST (i.e. if you're in a +2 timezone then Knex will default to +2 if you don't specify it manually)
-  - however if you specify a different timezone then it will offset the dates on insert / select (i.e. you will see differences between dates inserted with knex instance where timezone was specified vs an instance where timezone was not specified)
+- knex appears to tzoffset as follows:
+  - on insert by the timezone that you specify in the knex config options (or the system timezone if unspecified)
+  - on select by the system timezone regardless of what you specify in the knex config options
+  - this happens in the same fashion for both DATETIME and TIMESTAMP
+- hence the only safe solution is to:
+  - avoid specifying the timezone (knex will store UTC dates in sql)
+  - or specify the timezone explicitly but match the system timezone
+- do NOT specify a different timezone the the system timezone
+  - this will offset by different amounts on insert & select and hence cause you to receive a different date upon select to that which was inserted
 
 Behaviour may have changed
 
