@@ -8,11 +8,22 @@ Current behaviour (2022-01-20)
   - on insert by the timezone that you specify in the knex config options (or the system timezone if unspecified)
   - on select by the system timezone regardless of what you specify in the knex config options
   - this happens in the same fashion for both DATETIME and TIMESTAMP
-- hence the only safe solution is to:
-  - avoid specifying the timezone (knex will store UTC dates in sql)
+- hence the only solution is to:
+  - avoid specifying the timezone
   - or specify the timezone explicitly but match the system timezone
-- do NOT specify a different timezone the the system timezone
+  - note: in either case above knex will write the **local** date string to mysql (see problem below)
+- NOTE: do NOT attempt to resolve this by specifying a different timezone to the system timezone (e.g. UTC when your system is not in UTC)
   - this will offset by different amounts on insert & select and hence cause you to receive a different date upon select to that which was inserted
+
+Problem
+
+- mysql DATETIMEs don't have a timezone
+  - if you read and write local dates from 2 systems with different timezones then you will wind up with different dates on each system
+  - e.g. if you have an ec2 in eu-west-2 (i.e. +00:00) writing dates and a support machine in af-south-1 (i.e. +02:00) reading dates then
+    - the ec2 will write "2022-01-01 00:00" to the DB intending it to be "2022-01-01Z"
+    - and the support machine will read "2022-01-01 00:00" as "2021-12-31T22:00:00.000Z"
+- the solution to this is either:
+  - set timezone to +0 (so that inserts are not modified) and manually offset dates on select by `- systemOffset`
 
 Behaviour may have changed
 
