@@ -95,16 +95,16 @@ TZ_STR: +05:00
 ├─────────┼────┼───────────────────────┼──────────────────────────┤
 │    0    │ 1  │  'default UTC 00:00'  │ 2022-01-01T00:00:00.000Z │
 │    1    │ 2  │ 'default Local 00:00' │ 2021-12-31T22:00:00.000Z │
-│    2    │ 3  │  '+05:00 UTC 00:00'   │ 2022-01-01T03:00:00.000Z │
-│    3    │ 4  │ '+05:00 Local 00:00'  │ 2022-01-01T01:00:00.000Z │
+│    2    │ 3  │  '+05:00 UTC 00:00'   │ 2022-01-01T03:00:00.000Z │ <= knex uses configured timezone (+5) on insert but default timezone (+2) on select? see sql output below
+│    3    │ 4  │ '+05:00 Local 00:00'  │ 2022-01-01T01:00:00.000Z │ <= knex uses configured timezone (+5) on insert but default timezone (+2) on select? see sql output below
 └─────────┴────┴───────────────────────┴──────────────────────────┘
 ┌─────────┬────┬───────────────────────┬──────────────────────────┐
 │ (index) │ id │        message        │        timestamp1        │
 ├─────────┼────┼───────────────────────┼──────────────────────────┤
 │    0    │ 1  │  'default UTC 00:00'  │ 2022-01-01T00:00:00.000Z │
 │    1    │ 2  │ 'default Local 00:00' │ 2021-12-31T22:00:00.000Z │
-│    2    │ 3  │  '+05:00 UTC 00:00'   │ 2022-01-01T03:00:00.000Z │
-│    3    │ 4  │ '+05:00 Local 00:00'  │ 2022-01-01T01:00:00.000Z │
+│    2    │ 3  │  '+05:00 UTC 00:00'   │ 2022-01-01T03:00:00.000Z │ <= knex uses configured timezone (+5) on insert but default timezone (+2) on select? see sql output below
+│    3    │ 4  │ '+05:00 Local 00:00'  │ 2022-01-01T01:00:00.000Z │ <= knex uses configured timezone (+5) on insert but default timezone (+2) on select? see sql output below
 └─────────┴────┴───────────────────────┴──────────────────────────┘
 mysql: [Warning] Using a password on the command line interface can be insecure.
 +----+---------------------+---------------------+
@@ -112,8 +112,8 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 +----+---------------------+---------------------+
 |  1 | default UTC 00:00   | 2022-01-01 02:00:00 |
 |  2 | default Local 00:00 | 2022-01-01 00:00:00 |
-|  3 | +05:00 UTC 00:00    | 2022-01-01 05:00:00 |
-|  4 | +05:00 Local 00:00  | 2022-01-01 03:00:00 |
+|  3 | +05:00 UTC 00:00    | 2022-01-01 05:00:00 | <= knex uses configured timezone (+5) on insert
+|  4 | +05:00 Local 00:00  | 2022-01-01 03:00:00 | <= knex uses configured timezone (+5) on insert
 +----+---------------------+---------------------+
 mysql: [Warning] Using a password on the command line interface can be insecure.
 +----+---------------------+---------------------+
@@ -121,7 +121,7 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 +----+---------------------+---------------------+
 |  1 | default UTC 00:00   | 2022-01-01 02:00:00 |
 |  2 | default Local 00:00 | 2022-01-01 00:00:00 |
-|  3 | +05:00 UTC 00:00    | 2022-01-01 05:00:00 |
-|  4 | +05:00 Local 00:00  | 2022-01-01 03:00:00 |
+|  3 | +05:00 UTC 00:00    | 2022-01-01 05:00:00 | <= knex uses configured timezone (+5) on insert
+|  4 | +05:00 Local 00:00  | 2022-01-01 03:00:00 | <= knex uses configured timezone (+5) on insert
 +----+---------------------+---------------------+
 ```
