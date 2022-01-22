@@ -1,65 +1,5 @@
 import Knex from "knex";
 
-//#region timezone
-
-// timezone difference in hours and minutes e.g. +02:00, -06:00 or Z
-function timeZoneStr() {
-  let offset_hrs = Math.floor(Math.abs(TZ_OFFSET / 60));
-  let offset_min = Math.abs(TZ_OFFSET % 60);
-  let tzStr;
-  if (offset_hrs < 10) {
-    offset_hrs = "0" + offset_hrs;
-  }
-  if (offset_min < 10) {
-    offset_min = "0" + offset_min;
-  }
-  if (TZ_OFFSET < 0) {
-    tzStr = "+" + offset_hrs + ":" + offset_min;
-  } else if (TZ_OFFSET > 0) {
-    tzStr = "-" + offset_hrs + ":" + offset_min;
-  } else if (TZ_OFFSET == 0) {
-    tzStr = "+00:00";
-  }
-  return tzStr;
-}
-
-// TODO: try replace with a TZ_OFFSET that differs from your actual timezone
-// const TZ_OFFSET = -300; // +05:00
-// const TZ_OFFSET = 0; // +00:00
-const TZ_OFFSET = new Date().getTimezoneOffset();
-const TZ_OFFSET_MS = TZ_OFFSET * 60 * 1000;
-const TZ_STR = timeZoneStr();
-
-// console.log("TZ_OFFSET:", TZ_OFFSET);
-// console.log("TZ_OFFSET_MS:", TZ_OFFSET_MS);
-console.log("TZ_STR:", TZ_STR);
-
-//#endregion
-
-//#region config
-
-const normalConnection = {
-  database: "test",
-  host: "0.0.0.0",
-  user: "test",
-  password: "test123",
-  connectTimeout: 1000,
-  multipleStatements: true, // allow `knex.raw(query)`with multiple statements at a time
-};
-const connectionWithTimezoneOffset = Object.assign({}, normalConnection, {
-  timezone: TZ_STR,
-});
-const config1 = {
-  client: "mysql",
-  connection: normalConnection,
-  acquireConnectionTimeout: 2000,
-};
-const config2 = Object.assign({}, config1, {
-  connection: connectionWithTimezoneOffset,
-});
-
-//#endregion
-
 //#region sql
 
 function fixDatesOnWrite(instance) {
@@ -159,6 +99,8 @@ async function dateTest(offset, config, doManualOffset = false) {
       };
       await insertTimestamp(knex, insertTimestamp4, true);
     }
+    // select
+    await dump(knex);
   } catch (e) {
     console.error(e);
   } finally {
@@ -168,28 +110,36 @@ async function dateTest(offset, config, doManualOffset = false) {
   }
 }
 
+async function dump(knex) {
+  // select
+  const rows1 = await knex("dateTable").select("*");
+  console.table(rows1);
+  const rows2 = await knex("timestampTable").select("*");
+  console.table(rows2);
+}
+
 //#endregion
 
 //#region run
 
-async function run() {
+async function reset() {
   let knex;
   try {
-    knex = Knex(config1);
+    knex = Knex({
+      client: "mysql",
+      connection: {
+        database: "test",
+        host: "0.0.0.0",
+        user: "test",
+        password: "test123",
+        connectTimeout: 1000,
+        multipleStatements: true, // allow `knex.raw(query)`with multiple statements at a time
+      },
+      acquireConnectionTimeout: 2000,
+    });
 
     // truncate so we can re-run on clean tables
     await truncate(knex);
-
-    // insert without timezone specified
-    await dateTest("default", config1);
-    // insert without timezone specified
-    await dateTest(TZ_STR, config2);
-
-    // select
-    const rows1 = await knex("dateTable").select("*");
-    console.table(rows1);
-    const rows2 = await knex("timestampTable").select("*");
-    console.table(rows2);
   } catch (e) {
     console.error(e);
   } finally {
@@ -197,6 +147,58 @@ async function run() {
       knex.destroy();
     }
   }
+}
+
+async function run() {
+  await reset();
+
+  // insert without timezone specified
+  await dateTest("default", {
+    client: "mysql",
+    connection: {
+      database: "test",
+      host: "0.0.0.0",
+      user: "test",
+      password: "test123",
+      connectTimeout: 1000,
+      multipleStatements: true, // allow `knex.raw(query)`with multiple statements at a time
+    },
+    acquireConnectionTimeout: 2000,
+  });
+
+  // insert without timezone specified
+  await dateTest("Z", {
+    client: "mysql",
+    connection: {
+      database: "test",
+      host: "0.0.0.0",
+      user: "test",
+      password: "test123",
+      connectTimeout: 1000,
+      multipleStatements: true, // allow `knex.raw(query)`with multiple statements at a time
+      timezone: "Z",
+      // dateStrings: true, // https://github.com/sidorares/node-mysql2/issues/1089
+    },
+    acquireConnectionTimeout: 2000,
+  });
+
+  /*
+  // careful not to mix knex instances - select with timezone:local knex
+  let knex = Knex({
+    client: "mysql",
+    connection: {
+      database: "test",
+      host: "0.0.0.0",
+      user: "test",
+      password: "test123",
+      connectTimeout: 1000,
+      multipleStatements: true, // allow `knex.raw(query)`with multiple statements at a time
+    },
+    acquireConnectionTimeout: 2000,
+  });
+  await dump(knex);
+  knex.destroy();
+  */
 }
 run();
 
