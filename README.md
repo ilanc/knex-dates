@@ -2,8 +2,10 @@
 
 Summary
 
-- timezone: "Z" should be sufficient to write UTC dates to mysql
-- it will also read them correctly (has a [bug](#incorrect) which made it look like timezone was only applied to insert not select)
+- `timezone: "Z"` should be sufficient to write UTC dates to mysql
+- it will also read them correctly
+- see: [final.mjs](./src/final.mjs)
+- NB: my old code: [dates.mjs](./src/dates.mjs) had a [bug](#incorrect) which made it look like timezone was only applied to insert not select
 
 ## setup
 
